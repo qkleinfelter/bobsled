@@ -30,6 +30,13 @@
             </div>
         </div>
 
+        <div id="track-select-screen" class="screen">
+            <h2 class="track-select-title">SELECT TRACK</h2>
+            <div id="track-cards" class="track-cards"></div>
+            <button id="track-go-btn" class="confirm-btn" style="margin-top:24px;">GO!</button>
+            <p class="controls-hint">← → to browse &nbsp; SPACE to start</p>
+        </div>
+
         <div id="countdown-screen" class="screen">
             <div id="countdown">3</div>
         </div>
@@ -37,6 +44,7 @@
         <div id="finish-screen" class="screen">
             <h2>FINISH!</h2>
             <div class="final-time" id="final-time">0:00.000</div>
+            <div class="final-topspeed" id="final-topspeed">Top Speed: 0 mph</div>
             <div id="name-entry">
                 <h3>ENTER YOUR NAME</h3>
                 <div class="letters" id="name-letters"></div>
@@ -59,8 +67,9 @@
 
         <div id="leaderboard-screen" class="screen">
             <h2>LEADERBOARD</h2>
+            <h3 id="leaderboard-title" class="leaderboard-track-name"></h3>
             <table id="leaderboard-table">
-                <thead><tr><th>#</th><th>NAME</th><th>TIME</th></tr></thead>
+                <thead><tr><th>#</th><th>NAME</th><th>TIME</th><th>TOP SPEED</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
             <p class="prompt" id="leaderboard-prompt">TAP OR PRESS SPACE TO RACE AGAIN</p>

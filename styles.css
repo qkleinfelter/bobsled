@@ -220,3 +220,63 @@ html, body {
     -webkit-tap-highlight-color: transparent;
     padding: 4px 8px;
 }
+
+/* Track Select Screen */
+.track-select-title {
+    font-size: 36px;
+    color: #4fc3f7;
+    letter-spacing: 6px;
+    margin-bottom: 28px;
+    text-shadow: 0 0 20px rgba(79,195,247,0.4);
+}
+.track-cards {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.track-card {
+    width: 200px;
+    padding: 20px 16px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+}
+.track-card:hover {
+    background: rgba(255,255,255,0.08);
+}
+.track-card.selected {
+    border-color: #4fc3f7;
+    background: rgba(79,195,247,0.1);
+    box-shadow: 0 0 20px rgba(79,195,247,0.3);
+}
+.track-card-name {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+.track-card-desc {
+    font-size: 13px;
+    color: #90a4ae;
+    line-height: 1.5;
+}
+
+/* Finish top speed */
+.final-topspeed {
+    font-size: 24px;
+    color: #4fc3f7;
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+}
+
+/* Leaderboard track name */
+.leaderboard-track-name {
+    font-size: 20px;
+    color: #ffcc80;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+    font-weight: normal;
+}

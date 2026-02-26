@@ -28,6 +28,7 @@
     const countdownText = document.getElementById("countdown");
     const finishScreen = document.getElementById("finish-screen");
     const finalTimeEl = document.getElementById("final-time");
+    const finalTopSpeedEl = document.getElementById("final-topspeed");
     const nameEntry = document.getElementById("name-entry");
     const nameLettersEl = document.getElementById("name-letters");
     const finishPrompt = document.getElementById("finish-prompt");
@@ -123,38 +124,111 @@
     // Each point stores: { x, y, angle, curvature, dist }
     // `dist` = cumulative distance from start.
 
-    function generateTrack() {
-        // Define track as a series of segments: { type, length, curvature }
-        // curvature > 0 = turning right, < 0 = turning left, 0 = straight
-        const segments = [
-            { len: 40, curv: 0 },        // starting straight
-            { len: 30, curv: 0.04 },     // gentle right
-            { len: 20, curv: 0 },        // straight
-            { len: 40, curv: -0.06 },    // left curve
-            { len: 15, curv: 0 },        // straight
-            { len: 35, curv: 0.07 },     // right curve
-            { len: 25, curv: -0.03 },    // gentle left
-            { len: 20, curv: 0 },        // straight
-            { len: 50, curv: -0.08 },    // long left curve
-            { len: 15, curv: 0 },        // straight
-            { len: 30, curv: 0.05 },     // right
-            { len: 20, curv: 0.09 },     // sharp right (hairpin)
-            { len: 25, curv: -0.04 },    // left
-            { len: 10, curv: 0 },        // straight
-            { len: 35, curv: -0.07 },    // left
-            { len: 30, curv: 0.06 },     // right
-            { len: 18, curv: 0 },        // straight
-            { len: 45, curv: -0.05 },    // long sweeping left
-            { len: 20, curv: 0.04 },     // right
-            { len: 12, curv: 0 },        // straight
-            { len: 35, curv: 0.08 },     // sharp right
-            { len: 25, curv: -0.06 },    // left
-            { len: 20, curv: 0 },        // straight
-            { len: 40, curv: -0.09 },    // sharp left hairpin
-            { len: 15, curv: 0 },        // straight
-            { len: 30, curv: 0.03 },     // gentle right
-            { len: 50, curv: 0 },        // finishing straight
-        ];
+    // ---- Track Definitions ----
+    const TRACKS = [
+        {
+            id: "alpine",
+            name: "ALPINE PASS",
+            description: "Gentle curves — perfect for beginners",
+            color: "#4fc3f7",
+            segments: [
+                { len: 50, curv: 0 },
+                { len: 35, curv: 0.03 },
+                { len: 25, curv: 0 },
+                { len: 40, curv: -0.04 },
+                { len: 20, curv: 0 },
+                { len: 30, curv: 0.05 },
+                { len: 20, curv: -0.03 },
+                { len: 25, curv: 0 },
+                { len: 35, curv: -0.05 },
+                { len: 20, curv: 0 },
+                { len: 30, curv: 0.04 },
+                { len: 20, curv: 0 },
+                { len: 35, curv: -0.04 },
+                { len: 25, curv: 0.03 },
+                { len: 15, curv: 0 },
+                { len: 30, curv: -0.03 },
+                { len: 60, curv: 0 },
+            ],
+        },
+        {
+            id: "glacier",
+            name: "GLACIER RUN",
+            description: "Technical turns and S-curves",
+            color: "#ffcc80",
+            segments: [
+                { len: 40, curv: 0 },
+                { len: 30, curv: 0.04 },
+                { len: 20, curv: 0 },
+                { len: 40, curv: -0.06 },
+                { len: 15, curv: 0 },
+                { len: 35, curv: 0.07 },
+                { len: 25, curv: -0.03 },
+                { len: 20, curv: 0 },
+                { len: 50, curv: -0.08 },
+                { len: 15, curv: 0 },
+                { len: 30, curv: 0.05 },
+                { len: 20, curv: 0.09 },
+                { len: 25, curv: -0.04 },
+                { len: 10, curv: 0 },
+                { len: 35, curv: -0.07 },
+                { len: 30, curv: 0.06 },
+                { len: 18, curv: 0 },
+                { len: 45, curv: -0.05 },
+                { len: 20, curv: 0.04 },
+                { len: 12, curv: 0 },
+                { len: 35, curv: 0.08 },
+                { len: 25, curv: -0.06 },
+                { len: 20, curv: 0 },
+                { len: 40, curv: -0.09 },
+                { len: 15, curv: 0 },
+                { len: 30, curv: 0.03 },
+                { len: 50, curv: 0 },
+            ],
+        },
+        {
+            id: "inferno",
+            name: "INFERNO",
+            description: "Hairpins and high speed — experts only",
+            color: "#ef5350",
+            segments: [
+                { len: 30, curv: 0 },
+                { len: 25, curv: 0.06 },
+                { len: 10, curv: 0 },
+                { len: 35, curv: -0.10 },
+                { len: 30, curv: 0.08 },
+                { len: 12, curv: 0 },
+                { len: 20, curv: -0.12 },
+                { len: 15, curv: 0.05 },
+                { len: 40, curv: -0.07 },
+                { len: 8, curv: 0 },
+                { len: 25, curv: 0.11 },
+                { len: 20, curv: -0.09 },
+                { len: 15, curv: 0.10 },
+                { len: 10, curv: 0 },
+                { len: 30, curv: -0.13 },
+                { len: 18, curv: 0 },
+                { len: 25, curv: 0.09 },
+                { len: 35, curv: -0.08 },
+                { len: 20, curv: 0.12 },
+                { len: 8, curv: 0 },
+                { len: 30, curv: -0.11 },
+                { len: 15, curv: 0.06 },
+                { len: 10, curv: 0 },
+                { len: 25, curv: -0.10 },
+                { len: 20, curv: 0.07 },
+                { len: 35, curv: -0.14 },
+                { len: 15, curv: 0 },
+                { len: 20, curv: 0.05 },
+                { len: 40, curv: 0 },
+            ],
+        },
+    ];
+
+    let selectedTrackIdx = 0;
+
+    function generateTrack(trackDef) {
+        const segments = trackDef.segments;
 
         const step = 0.5; // meters per point
         const points = [];
@@ -234,18 +308,20 @@
     let lastFrameTime = 0;
     let countdownTimer = 0;
     let finishTime = 0;
+    let topSpeed = 0;
 
     function resetSled() {
         sled = {
-            s: 0,          // distance along track
-            d: 0,          // lateral offset (+ = right of center line facing forward)
-            v: 0,          // forward velocity m/s
-            omega: 0,      // lateral velocity m/s
+            s: 0,
+            d: 0,
+            v: 0,
+            omega: 0,
             wallHitTimer: 0,
             wallSide: 0,
             sparkles: [],
         };
         raceTime = 0;
+        topSpeed = 0;
     }
 
     function updatePhysics(dt) {
@@ -324,6 +400,9 @@
 
         // 10. Timer
         raceTime += dt;
+
+        // 10b. Track top speed
+        if (sled.v > topSpeed) topSpeed = sled.v;
 
         // 11. Finish check
         if (sled.s >= track.totalLength) {
@@ -747,6 +826,8 @@
         finishScreen.classList.remove("active");
         leaderboardScreen.classList.remove("active");
         pauseScreen.classList.remove("active");
+        const trackSelectScreen = document.getElementById("track-select-screen");
+        if (trackSelectScreen) trackSelectScreen.classList.remove("active");
         hudEl.style.display = "none";
         progressBar.style.display = "none";
         nameEntry.classList.remove("active");
@@ -759,12 +840,17 @@
                 titleScreen.classList.add("active");
                 break;
 
+            case "trackSelect":
+                document.getElementById("track-select-screen").classList.add("active");
+                buildTrackSelectUI();
+                break;
+
             case "countdown":
                 countdownScreen.classList.add("active");
                 hudEl.style.display = "flex";
                 progressBar.style.display = "block";
                 countdownTimer = 3.0;
-                track = generateTrack();
+                track = generateTrack(TRACKS[selectedTrackIdx]);
                 resetSled();
                 break;
 
@@ -779,6 +865,7 @@
                 hudEl.style.display = "flex";
                 progressBar.style.display = "block";
                 finalTimeEl.textContent = formatTime(finishTime);
+                finalTopSpeedEl.textContent = "Top Speed: " + Math.round(topSpeed * 2.237) + " mph";
                 // Start name entry
                 nameEntryState = { letters: [0, 0, 0], cursor: 0, done: false };
                 buildNameEntryUI();
@@ -787,7 +874,7 @@
 
             case "leaderboard":
                 leaderboardScreen.classList.add("active");
-                document.getElementById("leaderboard-prompt").textContent = "TAP OR PRESS SPACE TO RACE AGAIN";
+                document.getElementById("leaderboard-prompt").textContent = "TAP OR PRESS SPACE TO SELECT TRACK";
                 renderLeaderboard();
                 break;
 
@@ -812,6 +899,43 @@
                 document.getElementById("leaderboard-prompt").textContent = "PRESS SPACE OR ESC TO GO BACK";
                 renderLeaderboard();
                 break;
+        }
+    }
+
+    // ---- Track selection UI ----
+    function buildTrackSelectUI() {
+        const container = document.getElementById("track-cards");
+        if (!container) return;
+        container.innerHTML = "";
+
+        TRACKS.forEach((t, idx) => {
+            const card = document.createElement("div");
+            card.className = "track-card" + (idx === selectedTrackIdx ? " selected" : "");
+            card.style.borderColor = t.color;
+            if (idx === selectedTrackIdx) {
+                card.style.boxShadow = `0 0 20px ${t.color}44`;
+            }
+            card.innerHTML = `
+                <div class="track-card-name" style="color:${t.color}">${t.name}</div>
+                <div class="track-card-desc">${t.description}</div>
+            `;
+            card.addEventListener("click", () => {
+                selectedTrackIdx = idx;
+                buildTrackSelectUI();
+            });
+            card.addEventListener("touchend", (e) => {
+                e.stopPropagation();
+                selectedTrackIdx = idx;
+                buildTrackSelectUI();
+            });
+            container.appendChild(card);
+        });
+
+        // Update the go button
+        const goBtn = document.getElementById("track-go-btn");
+        if (goBtn) {
+            goBtn.style.borderColor = TRACKS[selectedTrackIdx].color;
+            goBtn.style.color = TRACKS[selectedTrackIdx].color;
         }
     }
 
@@ -852,6 +976,15 @@
     pauseResumeBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseResume(); });
     pauseRestartBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseRestart(); });
     pauseLbBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseLeaderboard(); });
+
+    // ---- Track select GO button ----
+    document.getElementById("track-go-btn").addEventListener("click", () => {
+        if (gameState === "trackSelect") transitionTo("countdown");
+    });
+    document.getElementById("track-go-btn").addEventListener("touchend", (e) => {
+        e.preventDefault();
+        if (gameState === "trackSelect") transitionTo("countdown");
+    });
 
     // ================================================================
     //  NAME ENTRY (Arcade style)
@@ -933,7 +1066,7 @@
                 // Confirm name
                 nameEntryState.done = true;
                 const name = nameEntryState.letters.map(i => ALPHABET[i]).join("");
-                saveToLeaderboard(name, finishTime);
+                saveToLeaderboard(name, finishTime, topSpeed);
                 nameEntry.classList.remove("active");
                 finishPrompt.style.display = "block";
             }
@@ -943,23 +1076,27 @@
     // ================================================================
     //  LEADERBOARD
     // ================================================================
-    const LB_KEY = "bobsled_leaderboard";
+    const LB_KEY_PREFIX = "bobsled_lb_";
+
+    function lbKey() {
+        return LB_KEY_PREFIX + TRACKS[selectedTrackIdx].id;
+    }
 
     function loadLeaderboard() {
         try {
-            const data = localStorage.getItem(LB_KEY);
+            const data = localStorage.getItem(lbKey());
             return data ? JSON.parse(data) : [];
         } catch {
             return [];
         }
     }
 
-    function saveToLeaderboard(name, time) {
+    function saveToLeaderboard(name, time, maxSpeed) {
         const lb = loadLeaderboard();
-        lb.push({ name, time });
+        lb.push({ name, time, topSpeed: maxSpeed });
         lb.sort((a, b) => a.time - b.time);
         if (lb.length > 10) lb.length = 10;
-        localStorage.setItem(LB_KEY, JSON.stringify(lb));
+        localStorage.setItem(lbKey(), JSON.stringify(lb));
     }
 
     let highlightName = "";
@@ -969,9 +1106,13 @@
         const lb = loadLeaderboard();
         leaderboardBody.innerHTML = "";
 
+        // Update track name in header
+        const lbTitle = document.getElementById("leaderboard-title");
+        if (lbTitle) lbTitle.textContent = TRACKS[selectedTrackIdx].name;
+
         if (lb.length === 0) {
             const row = document.createElement("tr");
-            row.innerHTML = `<td colspan="3" style="color:#546e7a;">No times yet</td>`;
+            row.innerHTML = `<td colspan="4" style="color:#546e7a;">No times yet</td>`;
             leaderboardBody.appendChild(row);
             return;
         }
@@ -982,10 +1123,12 @@
             if (entry.name === highlightName && Math.abs(entry.time - highlightTime) < 0.01) {
                 row.className = "highlight";
             }
+            const spd = entry.topSpeed ? Math.round(entry.topSpeed * 2.23694) : "--";
             row.innerHTML = `
                 <td class="rank">${i + 1}</td>
                 <td>${entry.name}</td>
                 <td>${formatTime(entry.time)}</td>
+                <td>${spd} mph</td>
             `;
             leaderboardBody.appendChild(row);
         }
@@ -1014,6 +1157,7 @@
                 break;
             case "paused":
             case "pausedLeaderboard":
+            case "trackSelect":
             case "title":
             case "finish":
             case "leaderboard":
@@ -1040,7 +1184,20 @@
         }
         if (gameState === "title" && (e.code === "Space" || e.code === "Enter")) {
             e.preventDefault();
-            transitionTo("countdown");
+            transitionTo("trackSelect");
+        } else if (gameState === "trackSelect") {
+            if (e.code === "ArrowLeft" || e.code === "KeyA") {
+                e.preventDefault();
+                selectedTrackIdx = (selectedTrackIdx - 1 + TRACKS.length) % TRACKS.length;
+                buildTrackSelectUI();
+            } else if (e.code === "ArrowRight" || e.code === "KeyD") {
+                e.preventDefault();
+                selectedTrackIdx = (selectedTrackIdx + 1) % TRACKS.length;
+                buildTrackSelectUI();
+            } else if (e.code === "Space" || e.code === "Enter") {
+                e.preventDefault();
+                transitionTo("countdown");
+            }
         } else if (gameState === "finish") {
             if (!nameEntryState.done) {
                 handleNameEntryInput(e);
@@ -1053,7 +1210,7 @@
             }
         } else if (gameState === "leaderboard" && (e.code === "Space" || e.code === "Enter")) {
             e.preventDefault();
-            transitionTo("countdown");
+            transitionTo("trackSelect");
         } else if (gameState === "pausedLeaderboard" && (e.code === "Space" || e.code === "Enter")) {
             e.preventDefault();
             transitionTo("paused");
@@ -1071,9 +1228,10 @@
         e.preventDefault();
 
         if (gameState === "title") {
-            // Request gyroscope permission on first user gesture (iOS requirement)
             initGyroscope();
-            transitionTo("countdown");
+            transitionTo("trackSelect");
+        } else if (gameState === "trackSelect") {
+            // Tap handled by track cards
         } else if (gameState === "finish") {
             if (nameEntryState.done) {
                 const name = nameEntryState.letters.map(i => ALPHABET[i]).join("");
@@ -1084,7 +1242,7 @@
             // Name entry touch is handled separately on the slots
         } else if (gameState === "leaderboard") {
             initGyroscope();
-            transitionTo("countdown");
+            transitionTo("trackSelect");
         } else if (gameState === "pausedLeaderboard") {
             transitionTo("paused");
         }
@@ -1134,7 +1292,7 @@
                 if (!nameEntryState.done) {
                     nameEntryState.done = true;
                     const name = nameEntryState.letters.map(i => ALPHABET[i]).join("");
-                    saveToLeaderboard(name, finishTime);
+                    saveToLeaderboard(name, finishTime, topSpeed);
                     nameEntry.classList.remove("active");
                     finishPrompt.style.display = "block";
                 }
@@ -1143,7 +1301,7 @@
                 if (!nameEntryState.done) {
                     nameEntryState.done = true;
                     const name = nameEntryState.letters.map(i => ALPHABET[i]).join("");
-                    saveToLeaderboard(name, finishTime);
+                    saveToLeaderboard(name, finishTime, topSpeed);
                     nameEntry.classList.remove("active");
                     finishPrompt.style.display = "block";
                 }
