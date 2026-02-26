@@ -44,13 +44,13 @@
         gravity: 3.2,          // m/s² downhill acceleration
         airDrag: 0.0008,       // drag coefficient (v²)
         iceFriction: 0.015,    // base friction
-        wallSpeedPenalty: 0.06, // fraction of speed lost on wall hit
-        wallBounce: 0.3,       // lateral velocity reversal factor
-        steerForce: 16.0,      // lateral acceleration from steering m/s²
-        lateralDamping: 6.0,   // damping rate on lateral velocity
-        trackHalfWidth: 3.2,   // meters from center to wall
-        centripetalScale: 0.7, // how much curvature pushes sled outward
-        optimalLineFactor: 0.03, // extra friction for bad line
+        wallSpeedPenalty: 0.09, // fraction of speed lost on wall hit
+        wallBounce: 0.4,       // lateral velocity reversal factor
+        steerForce: 14.0,      // lateral acceleration from steering m/s²
+        lateralDamping: 5.5,   // damping rate on lateral velocity
+        trackHalfWidth: 2.9,   // meters from center to wall
+        centripetalScale: 0.85, // how much curvature pushes sled outward
+        optimalLineFactor: 0.04, // extra friction for bad line
     };
 
     const TRACK_VISUAL = {
