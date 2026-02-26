@@ -57,11 +57,58 @@
     window.addEventListener("keydown", e => { keys[e.code] = true; });
     window.addEventListener("keyup", e => { keys[e.code] = false; });
 
+    // ---- Gyroscope / tilt input for mobile ----
+    let tiltValue = 0; // -1 to 1, mapped from device tilt
+    let gyroAvailable = false;
+    const TILT_DEAD_ZONE = 3;   // degrees of tilt ignored
+    const TILT_MAX_ANGLE = 25;  // degrees for full steer
+
+    function initGyroscope() {
+        // iOS 13+ requires permission
+        if (typeof DeviceOrientationEvent !== "undefined" &&
+            typeof DeviceOrientationEvent.requestPermission === "function") {
+            DeviceOrientationEvent.requestPermission()
+                .then(state => {
+                    if (state === "granted") {
+                        window.addEventListener("deviceorientation", handleOrientation);
+                        gyroAvailable = true;
+                    }
+                })
+                .catch(console.warn);
+        } else if ("DeviceOrientationEvent" in window) {
+            // Android / older iOS — just listen
+            window.addEventListener("deviceorientation", handleOrientation);
+            // We'll confirm availability on the first event
+        }
+    }
+
+    function handleOrientation(e) {
+        if (e.gamma === null) return;
+        gyroAvailable = true;
+        // gamma: left/right tilt in degrees (-90..90)
+        let tilt = e.gamma;
+        // Apply dead zone
+        if (Math.abs(tilt) < TILT_DEAD_ZONE) {
+            tiltValue = 0;
+        } else {
+            const sign = Math.sign(tilt);
+            const adjusted = Math.abs(tilt) - TILT_DEAD_ZONE;
+            const maxAdj = TILT_MAX_ANGLE - TILT_DEAD_ZONE;
+            tiltValue = sign * Math.min(1, adjusted / maxAdj);
+        }
+    }
+
+    // ---- Touch input for mobile ----
+    let isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent) ||
+                   ("ontouchstart" in window);
+
     function steerInput() {
         let s = 0;
         if (keys["ArrowLeft"] || keys["KeyA"]) s += 1;
         if (keys["ArrowRight"] || keys["KeyD"]) s -= 1;
-        return s;
+        // Layer gyroscope tilt on top (inverted to match visual direction)
+        if (gyroAvailable) s -= tiltValue;
+        return Math.max(-1, Math.min(1, s));
     }
 
     // ================================================================
@@ -780,6 +827,9 @@
 
             nameLettersEl.appendChild(slot);
         }
+        // Attach touch handlers for mobile
+        attachNameEntryTouch();
+        attachConfirmButton();
     }
 
     function updateNameEntryUI() {
@@ -937,6 +987,90 @@
     window.addEventListener("keydown", e => {
         if (e.code === "Space") e.preventDefault();
     });
+
+    // ---- Touch / tap handler for mobile ----
+    function handleTap(e) {
+        // Prevent double-fire and zoom
+        e.preventDefault();
+
+        if (gameState === "title") {
+            // Request gyroscope permission on first user gesture (iOS requirement)
+            initGyroscope();
+            transitionTo("countdown");
+        } else if (gameState === "finish") {
+            if (nameEntryState.done) {
+                const name = nameEntryState.letters.map(i => ALPHABET[i]).join("");
+                highlightName = name;
+                highlightTime = finishTime;
+                transitionTo("leaderboard");
+            }
+            // Name entry touch is handled separately on the slots
+        } else if (gameState === "leaderboard") {
+            initGyroscope();
+            transitionTo("countdown");
+        }
+    }
+    canvas.addEventListener("touchend", handleTap);
+
+    // Touch-based name entry: make letter slots and arrows tappable
+    function attachNameEntryTouch() {
+        for (let i = 0; i < 3; i++) {
+            const slot = document.getElementById("letter-" + i);
+            if (!slot) continue;
+            // Tap slot to select it
+            slot.addEventListener("touchend", function (e) {
+                e.stopPropagation();
+                nameEntryState.cursor = i;
+                updateNameEntryUI();
+            });
+            // Tap up arrow
+            const upArrow = slot.querySelector(".arrow.up");
+            if (upArrow) {
+                upArrow.addEventListener("touchend", function (e) {
+                    e.stopPropagation();
+                    nameEntryState.cursor = i;
+                    nameEntryState.letters[i] = (nameEntryState.letters[i] - 1 + ALPHABET.length) % ALPHABET.length;
+                    updateNameEntryUI();
+                });
+            }
+            // Tap down arrow
+            const downArrow = slot.querySelector(".arrow.down");
+            if (downArrow) {
+                downArrow.addEventListener("touchend", function (e) {
+                    e.stopPropagation();
+                    nameEntryState.cursor = i;
+                    nameEntryState.letters[i] = (nameEntryState.letters[i] + 1) % ALPHABET.length;
+                    updateNameEntryUI();
+                });
+            }
+        }
+    }
+
+    // Confirm button for mobile name entry
+    function attachConfirmButton() {
+        const confirmBtn = document.getElementById("name-confirm-btn");
+        if (confirmBtn) {
+            confirmBtn.addEventListener("touchend", function (e) {
+                e.stopPropagation();
+                if (!nameEntryState.done) {
+                    nameEntryState.done = true;
+                    const name = nameEntryState.letters.map(i => ALPHABET[i]).join("");
+                    saveToLeaderboard(name, finishTime);
+                    nameEntry.classList.remove("active");
+                    finishPrompt.style.display = "block";
+                }
+            });
+            confirmBtn.addEventListener("click", function (e) {
+                if (!nameEntryState.done) {
+                    nameEntryState.done = true;
+                    const name = nameEntryState.letters.map(i => ALPHABET[i]).join("");
+                    saveToLeaderboard(name, finishTime);
+                    nameEntry.classList.remove("active");
+                    finishPrompt.style.display = "block";
+                }
+            });
+        }
+    }
 
     // ---- Start ----
     transitionTo("title");

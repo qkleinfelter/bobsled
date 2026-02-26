@@ -162,3 +162,26 @@ html, body {
     margin-top: 20px;
     line-height: 1.8;
 }
+.confirm-btn {
+    margin-top: 16px;
+    padding: 10px 32px;
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(79,195,247,0.2);
+    border: 2px solid #4fc3f7;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.confirm-btn:hover, .confirm-btn:active {
+    background: rgba(79,195,247,0.4);
+    box-shadow: 0 0 15px rgba(79,195,247,0.4);
+}
+#name-entry .letter-slot .arrow {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    padding: 4px 8px;
+}
