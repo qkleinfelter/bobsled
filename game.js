@@ -59,8 +59,8 @@
 
     function steerInput() {
         let s = 0;
-        if (keys["ArrowLeft"] || keys["KeyA"]) s -= 1;
-        if (keys["ArrowRight"] || keys["KeyD"]) s += 1;
+        if (keys["ArrowLeft"] || keys["KeyA"]) s += 1;
+        if (keys["ArrowRight"] || keys["KeyD"]) s -= 1;
         return s;
     }
 
