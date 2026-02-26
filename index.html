@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bobsled</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="hud" style="display:none;">
+        <span class="speed" id="hud-speed">0 km/h</span>
+        <span class="timer" id="hud-time">0:00.000</span>
+    </div>
+
+    <div id="track-progress" style="display:none;">
+        <div class="marker" id="progress-marker"></div>
+    </div>
+
+    <div id="ui-overlay">
+        <div id="title-screen" class="screen active">
+            <h1>BOBSLED</h1>
+            <p class="subtitle">Race the ice. Master the line.</p>
+            <p class="prompt">PRESS SPACE TO START</p>
+            <div class="controls-hint">
+                ← → or A/D to steer<br>
+                Find the optimal racing line through curves
+            </div>
+        </div>
+
+        <div id="countdown-screen" class="screen">
+            <div id="countdown">3</div>
+        </div>
+
+        <div id="finish-screen" class="screen">
+            <h2>FINISH!</h2>
+            <div class="final-time" id="final-time">0:00.000</div>
+            <div id="name-entry">
+                <h3>ENTER YOUR NAME</h3>
+                <div class="letters" id="name-letters"></div>
+                <p class="hint">↑/↓ change letter &nbsp;&nbsp; →/ENTER confirm</p>
+            </div>
+            <p class="prompt" id="finish-prompt" style="display:none;">PRESS SPACE TO CONTINUE</p>
+        </div>
+
+        <div id="leaderboard-screen" class="screen">
+            <h2>LEADERBOARD</h2>
+            <table id="leaderboard-table">
+                <thead><tr><th>#</th><th>NAME</th><th>TIME</th></tr></thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+            <p class="prompt">PRESS SPACE TO RACE AGAIN</p>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
