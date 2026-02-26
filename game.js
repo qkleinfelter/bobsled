@@ -21,6 +21,7 @@
     const hudEl = document.getElementById("hud");
     const hudSpeed = document.getElementById("hud-speed");
     const hudTime = document.getElementById("hud-time");
+    const hudTrack = document.getElementById("hud-track");
     const progressBar = document.getElementById("track-progress");
     const progressMarker = document.getElementById("progress-marker");
     const titleScreen = document.getElementById("title-screen");
@@ -39,6 +40,7 @@
     const pauseResumeBtn = document.getElementById("pause-resume");
     const pauseRestartBtn = document.getElementById("pause-restart");
     const pauseLbBtn = document.getElementById("pause-leaderboard");
+    const pauseTrackBtn = document.getElementById("pause-trackselect");
 
     // ---- Constants / Tuning ----
     const PHYSICS = {
@@ -804,6 +806,11 @@
         const mph = Math.round(sled.v * 2.23694);
         hudSpeed.textContent = mph + " mph";
 
+        // Track name & difficulty
+        const t = TRACKS[selectedTrackIdx];
+        hudTrack.textContent = t.name + "  ·  " + t.description;
+        hudTrack.style.color = t.color;
+
         // Time
         hudTime.textContent = formatTime(raceTime);
 
@@ -974,12 +981,20 @@
     function handlePauseLeaderboard() {
         if (gameState === "paused") transitionTo("pausedLeaderboard");
     }
+    function handlePauseTrackSelect() {
+        if (gameState === "paused") {
+            transitionTo("trackSelect");
+            buildTrackSelectUI();
+        }
+    }
     pauseResumeBtn.addEventListener("click", handlePauseResume);
     pauseRestartBtn.addEventListener("click", handlePauseRestart);
     pauseLbBtn.addEventListener("click", handlePauseLeaderboard);
+    pauseTrackBtn.addEventListener("click", handlePauseTrackSelect);
     pauseResumeBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseResume(); });
     pauseRestartBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseRestart(); });
     pauseLbBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseLeaderboard(); });
+    pauseTrackBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseTrackSelect(); });
 
     // ---- Track select GO button ----
     document.getElementById("track-go-btn").addEventListener("click", () => {

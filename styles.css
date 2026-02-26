@@ -29,6 +29,7 @@ html, body {
 }
 #hud span { display: inline-block; min-width: 120px; }
 #hud .speed { color: #4fc3f7; }
+#hud .track-label { color: #90a4ae; font-size: 14px; text-align: center; min-width: auto; letter-spacing: 2px; }
 #hud .timer { color: #fff; text-align: right; }
 .screen {
     display: none;
