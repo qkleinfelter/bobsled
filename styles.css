@@ -162,6 +162,41 @@ html, body {
     margin-top: 20px;
     line-height: 1.8;
 }
+#pause-screen h2 {
+    font-size: 48px;
+    color: #4fc3f7;
+    letter-spacing: 8px;
+    margin-bottom: 8px;
+}
+.pause-time {
+    font-size: 28px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 28px;
+}
+.pause-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.pause-btn {
+    padding: 12px 40px;
+    font-family: 'Courier New', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #e0e8ff;
+    background: rgba(79,195,247,0.1);
+    border: 2px solid #4fc3f7;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 4px;
+    transition: background 0.2s, box-shadow 0.2s;
+    min-width: 240px;
+}
+.pause-btn:hover, .pause-btn:active {
+    background: rgba(79,195,247,0.3);
+    box-shadow: 0 0 15px rgba(79,195,247,0.4);
+}
 .confirm-btn {
     margin-top: 16px;
     padding: 10px 32px;

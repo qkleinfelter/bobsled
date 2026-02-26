@@ -46,13 +46,24 @@
             <p class="prompt" id="finish-prompt" style="display:none;">TAP OR PRESS SPACE TO CONTINUE</p>
         </div>
 
+        <div id="pause-screen" class="screen">
+            <h2>PAUSED</h2>
+            <div class="pause-time" id="pause-time">0:00.000</div>
+            <div class="pause-menu">
+                <button class="pause-btn" id="pause-resume">RESUME</button>
+                <button class="pause-btn" id="pause-restart">RESTART</button>
+                <button class="pause-btn" id="pause-leaderboard">LEADERBOARD</button>
+            </div>
+            <p class="controls-hint">ESC to resume</p>
+        </div>
+
         <div id="leaderboard-screen" class="screen">
             <h2>LEADERBOARD</h2>
             <table id="leaderboard-table">
                 <thead><tr><th>#</th><th>NAME</th><th>TIME</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
-            <p class="prompt">TAP OR PRESS SPACE TO RACE AGAIN</p>
+            <p class="prompt" id="leaderboard-prompt">TAP OR PRESS SPACE TO RACE AGAIN</p>
         </div>
     </div>
 

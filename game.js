@@ -33,6 +33,11 @@
     const finishPrompt = document.getElementById("finish-prompt");
     const leaderboardScreen = document.getElementById("leaderboard-screen");
     const leaderboardBody = document.getElementById("leaderboard-body");
+    const pauseScreen = document.getElementById("pause-screen");
+    const pauseTimeEl = document.getElementById("pause-time");
+    const pauseResumeBtn = document.getElementById("pause-resume");
+    const pauseRestartBtn = document.getElementById("pause-restart");
+    const pauseLbBtn = document.getElementById("pause-leaderboard");
 
     // ---- Constants / Tuning ----
     const PHYSICS = {
@@ -364,7 +369,7 @@
         ctx.fillStyle = "#0a0e1a";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (gameState === "racing" || gameState === "countdown" || gameState === "finish") {
+        if (gameState === "racing" || gameState === "countdown" || gameState === "finish" || gameState === "paused" || gameState === "resuming" || gameState === "pausedLeaderboard") {
             renderTrack();
         }
     }
@@ -741,6 +746,7 @@
         countdownScreen.classList.remove("active");
         finishScreen.classList.remove("active");
         leaderboardScreen.classList.remove("active");
+        pauseScreen.classList.remove("active");
         hudEl.style.display = "none";
         progressBar.style.display = "none";
         nameEntry.classList.remove("active");
@@ -781,6 +787,29 @@
 
             case "leaderboard":
                 leaderboardScreen.classList.add("active");
+                document.getElementById("leaderboard-prompt").textContent = "TAP OR PRESS SPACE TO RACE AGAIN";
+                renderLeaderboard();
+                break;
+
+            case "paused":
+                pauseScreen.classList.add("active");
+                hudEl.style.display = "flex";
+                progressBar.style.display = "block";
+                pauseTimeEl.textContent = formatTime(raceTime);
+                break;
+
+            case "resuming":
+                countdownScreen.classList.add("active");
+                hudEl.style.display = "flex";
+                progressBar.style.display = "block";
+                countdownTimer = 3.0;
+                break;
+
+            case "pausedLeaderboard":
+                leaderboardScreen.classList.add("active");
+                hudEl.style.display = "flex";
+                progressBar.style.display = "block";
+                document.getElementById("leaderboard-prompt").textContent = "PRESS SPACE OR ESC TO GO BACK";
                 renderLeaderboard();
                 break;
         }
@@ -796,6 +825,33 @@
             countdownText.textContent = Math.ceil(countdownTimer);
         }
     }
+
+    function updateResumeCountdown(dt) {
+        countdownTimer -= dt;
+        if (countdownTimer <= 0) {
+            countdownText.textContent = "GO!";
+            setTimeout(() => transitionTo("racing"), 300);
+        } else {
+            countdownText.textContent = Math.ceil(countdownTimer);
+        }
+    }
+
+    // ---- Pause menu button handlers ----
+    function handlePauseResume() {
+        if (gameState === "paused") transitionTo("resuming");
+    }
+    function handlePauseRestart() {
+        if (gameState === "paused") transitionTo("countdown");
+    }
+    function handlePauseLeaderboard() {
+        if (gameState === "paused") transitionTo("pausedLeaderboard");
+    }
+    pauseResumeBtn.addEventListener("click", handlePauseResume);
+    pauseRestartBtn.addEventListener("click", handlePauseRestart);
+    pauseLbBtn.addEventListener("click", handlePauseLeaderboard);
+    pauseResumeBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseResume(); });
+    pauseRestartBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseRestart(); });
+    pauseLbBtn.addEventListener("touchend", e => { e.preventDefault(); handlePauseLeaderboard(); });
 
     // ================================================================
     //  NAME ENTRY (Arcade style)
@@ -948,10 +1004,16 @@
                 updateCountdown(dt);
                 render();
                 break;
+            case "resuming":
+                updateResumeCountdown(dt);
+                render();
+                break;
             case "racing":
                 updatePhysics(dt);
                 render();
                 break;
+            case "paused":
+            case "pausedLeaderboard":
             case "title":
             case "finish":
             case "leaderboard":
@@ -964,6 +1026,18 @@
 
     // ---- Global key handler ----
     window.addEventListener("keydown", function (e) {
+        // Pause / unpause with Escape
+        if (e.code === "Escape") {
+            e.preventDefault();
+            if (gameState === "racing") {
+                transitionTo("paused");
+            } else if (gameState === "paused") {
+                transitionTo("resuming");
+            } else if (gameState === "pausedLeaderboard") {
+                transitionTo("paused");
+            }
+            return;
+        }
         if (gameState === "title" && (e.code === "Space" || e.code === "Enter")) {
             e.preventDefault();
             transitionTo("countdown");
@@ -980,6 +1054,9 @@
         } else if (gameState === "leaderboard" && (e.code === "Space" || e.code === "Enter")) {
             e.preventDefault();
             transitionTo("countdown");
+        } else if (gameState === "pausedLeaderboard" && (e.code === "Space" || e.code === "Enter")) {
+            e.preventDefault();
+            transitionTo("paused");
         }
     });
 
@@ -1008,6 +1085,8 @@
         } else if (gameState === "leaderboard") {
             initGyroscope();
             transitionTo("countdown");
+        } else if (gameState === "pausedLeaderboard") {
+            transitionTo("paused");
         }
     }
     canvas.addEventListener("touchend", handleTap);
