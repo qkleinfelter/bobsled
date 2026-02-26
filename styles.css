@@ -157,6 +157,26 @@ html, body {
     box-shadow: 0 0 8px rgba(79,195,247,0.6);
     transition: top 0.1s;
 }
+.sector-divider {
+    position: absolute;
+    left: -4px;
+    width: 16px;
+    height: 2px;
+    background: rgba(255,255,255,0.35);
+    border-radius: 1px;
+}
+.sector-time {
+    position: absolute;
+    right: 18px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    transform: translateY(-50%);
+    text-shadow: 0 0 6px rgba(0,0,0,0.8);
+    opacity: 0;
+    transition: opacity 0.4s;
+}
 .controls-hint {
     font-size: 13px;
     color: #607d8b;

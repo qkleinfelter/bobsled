@@ -312,6 +312,29 @@
     let finishTime = 0;
     let topSpeed = 0;
 
+    // ---- Sector tracking ----
+    const NUM_SECTORS = 3;
+    let currentSector = 0;
+    let sectorStartTime = 0;
+    let sectorTimes = [];       // filled as sectors complete
+    let sectorColors = [];      // color per completed sector
+    const SECTOR_KEY_PREFIX = "bobsled_sectors_";
+
+    function sectorKey() {
+        return SECTOR_KEY_PREFIX + TRACKS[selectedTrackIdx].id;
+    }
+    function loadBestSectors() {
+        try {
+            const raw = localStorage.getItem(sectorKey());
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    }
+    function saveBestSectors(times) {
+        const prev = loadBestSectors();
+        const best = prev ? prev.map((b, i) => Math.min(b, times[i])) : [...times];
+        localStorage.setItem(sectorKey(), JSON.stringify(best));
+    }
+
     function resetSled() {
         sled = {
             s: 0,
@@ -324,6 +347,15 @@
         };
         raceTime = 0;
         topSpeed = 0;
+        currentSector = 0;
+        sectorStartTime = 0;
+        sectorTimes = [];
+        sectorColors = [];
+        // Reset sector time labels
+        for (let i = 0; i < NUM_SECTORS; i++) {
+            const el = document.getElementById("sector-time-" + i);
+            if (el) { el.textContent = ""; el.style.opacity = "0"; }
+        }
     }
 
     function updatePhysics(dt) {
@@ -406,10 +438,45 @@
         // 10b. Track top speed
         if (sled.v > topSpeed) topSpeed = sled.v;
 
+        // 10c. Sector crossing check
+        if (currentSector < NUM_SECTORS) {
+            const sectorBoundary = track.totalLength * ((currentSector + 1) / NUM_SECTORS);
+            if (sled.s >= sectorBoundary) {
+                const sectorTime = raceTime - sectorStartTime;
+                sectorTimes.push(sectorTime);
+
+                // Compare to best
+                const best = loadBestSectors();
+                let color = "#4fc3f7"; // default neutral
+                if (best && best[currentSector]) {
+                    const bestT = best[currentSector];
+                    if (sectorTime < bestT) color = "#ab47bc";           // purple — faster
+                    else if (sectorTime <= bestT * 1.1) color = "#66bb6a"; // green — within 10%
+                    else color = "#ef5350";                               // red — >10% slower
+                }
+                sectorColors.push(color);
+
+                // Show sector time on minimap
+                const el = document.getElementById("sector-time-" + currentSector);
+                if (el) {
+                    el.textContent = formatSectorTime(sectorTime);
+                    el.style.color = color;
+                    el.style.opacity = "1";
+                }
+
+                currentSector++;
+                sectorStartTime = raceTime;
+            }
+        }
+
         // 11. Finish check
         if (sled.s >= track.totalLength) {
             sled.s = track.totalLength;
             finishTime = raceTime;
+            // Save best sector times
+            if (sectorTimes.length === NUM_SECTORS) {
+                saveBestSectors(sectorTimes);
+            }
             transitionTo("finish");
         }
     }
@@ -817,6 +884,22 @@
         // Progress marker
         const progress = Math.min(1, sled.s / track.totalLength);
         progressMarker.style.top = (progress * 286) + "px";
+
+        // Position sector dividers and time labels
+        for (let i = 0; i < NUM_SECTORS; i++) {
+            const frac = (i + 1) / NUM_SECTORS;
+            const yPos = frac * 286;
+            // Dividers (only between sectors, not at end)
+            if (i < NUM_SECTORS - 1) {
+                const div = document.getElementById("sector-div-" + (i + 1));
+                if (div) div.style.top = yPos + "px";
+            }
+            // Time labels — centered in each sector
+            const midFrac = (i + 0.5) / NUM_SECTORS;
+            const labelY = midFrac * 286;
+            const lbl = document.getElementById("sector-time-" + i);
+            if (lbl) lbl.style.top = labelY + "px";
+        }
     }
 
     function formatTime(t) {
@@ -824,6 +907,12 @@
         const secs = Math.floor(t % 60);
         const ms = Math.floor((t % 1) * 1000);
         return mins + ":" + String(secs).padStart(2, "0") + "." + String(ms).padStart(3, "0");
+    }
+
+    function formatSectorTime(t) {
+        const secs = Math.floor(t);
+        const ms = Math.floor((t % 1) * 100);
+        return secs + "." + String(ms).padStart(2, "0");
     }
 
     // ================================================================
