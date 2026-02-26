@@ -490,7 +490,7 @@
         drawDistanceMarkers(startIdx, endIdx, scale);
 
         // Draw start/finish lines
-        drawStartFinish(scale);
+        drawStartFinish(startIdx, endIdx, scale);
 
         // Draw sparks
         drawSparks(scale);
@@ -682,39 +682,43 @@
         }
     }
 
-    function drawStartFinish(scale) {
+    function drawStartFinish(startIdx, endIdx, scale) {
         const hw = PHYSICS.trackHalfWidth;
 
-        // Start line
-        const sp = track.points[0];
-        const sPerp = sp.angle + Math.PI / 2;
-        ctx.strokeStyle = "rgba(76,175,80,0.6)";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo((sp.x + Math.cos(sPerp) * (-hw)) * scale, (sp.y + Math.sin(sPerp) * (-hw)) * scale);
-        ctx.lineTo((sp.x + Math.cos(sPerp) * hw) * scale, (sp.y + Math.sin(sPerp) * hw) * scale);
-        ctx.stroke();
+        // Start line — only draw if index 0 is in visible range
+        if (startIdx === 0) {
+            const sp = track.points[0];
+            const sPerp = sp.angle + Math.PI / 2;
+            ctx.strokeStyle = "rgba(76,175,80,0.6)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo((sp.x + Math.cos(sPerp) * (-hw)) * scale, (sp.y + Math.sin(sPerp) * (-hw)) * scale);
+            ctx.lineTo((sp.x + Math.cos(sPerp) * hw) * scale, (sp.y + Math.sin(sPerp) * hw) * scale);
+            ctx.stroke();
+        }
 
-        // Finish line
-        const fp = track.points[track.points.length - 1];
-        const fPerp = fp.angle + Math.PI / 2;
-        ctx.strokeStyle = "rgba(255,82,82,0.6)";
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo((fp.x + Math.cos(fPerp) * (-hw)) * scale, (fp.y + Math.sin(fPerp) * (-hw)) * scale);
-        ctx.lineTo((fp.x + Math.cos(fPerp) * hw) * scale, (fp.y + Math.sin(fPerp) * hw) * scale);
-        ctx.stroke();
+        // Finish line — only draw if last index is in visible range
+        if (endIdx >= track.points.length - 2) {
+            const fp = track.points[track.points.length - 1];
+            const fPerp = fp.angle + Math.PI / 2;
+            ctx.strokeStyle = "rgba(255,82,82,0.6)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo((fp.x + Math.cos(fPerp) * (-hw)) * scale, (fp.y + Math.sin(fPerp) * (-hw)) * scale);
+            ctx.lineTo((fp.x + Math.cos(fPerp) * hw) * scale, (fp.y + Math.sin(fPerp) * hw) * scale);
+            ctx.stroke();
 
-        // Checkered pattern on finish
-        const numChecks = 8;
-        const checkSize = (hw * 2) / numChecks;
-        for (let i = 0; i < numChecks; i++) {
-            if (i % 2 === 0) {
-                const offset = -hw + i * checkSize;
-                const cx = (fp.x + Math.cos(fPerp) * (offset + checkSize / 2)) * scale;
-                const cy = (fp.y + Math.sin(fPerp) * (offset + checkSize / 2)) * scale;
-                ctx.fillStyle = "rgba(255,255,255,0.3)";
-                ctx.fillRect(cx - 3, cy - 3, 6, 6);
+            // Checkered pattern on finish
+            const numChecks = 8;
+            const checkSize = (hw * 2) / numChecks;
+            for (let i = 0; i < numChecks; i++) {
+                if (i % 2 === 0) {
+                    const offset = -hw + i * checkSize;
+                    const cx = (fp.x + Math.cos(fPerp) * (offset + checkSize / 2)) * scale;
+                    const cy = (fp.y + Math.sin(fPerp) * (offset + checkSize / 2)) * scale;
+                    ctx.fillStyle = "rgba(255,255,255,0.3)";
+                    ctx.fillRect(cx - 3, cy - 3, 6, 6);
+                }
             }
         }
     }
@@ -805,7 +809,7 @@
 
         // Progress marker
         const progress = Math.min(1, sled.s / track.totalLength);
-        progressMarker.style.top = ((1 - progress) * 286) + "px";
+        progressMarker.style.top = (progress * 286) + "px";
     }
 
     function formatTime(t) {
