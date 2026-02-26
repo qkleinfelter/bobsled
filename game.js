@@ -203,13 +203,30 @@
         const curv = tp.curvature;
         const hw = PHYSICS.trackHalfWidth;
 
+        // How close to the wall are we? (0 = center, 1 = at wall)
+        const wallProximity = Math.abs(sled.d) / hw;
+        // Is the curve pushing us toward the wall we're near?
+        const pushingIntoWall = (Math.sign(curv) === Math.sign(sled.d));
+
         // 1. Centripetal push: curvature * v² pushes sled outward
-        const centripetalAccel = curv * sled.v * sled.v * PHYSICS.centripetalScale;
+        // Reduce centripetal effect when pinned near wall to prevent "stuck" feeling
+        let centScale = PHYSICS.centripetalScale;
+        if (pushingIntoWall && wallProximity > 0.7) {
+            // Dampen centripetal force near the wall — slide along instead of pinning
+            centScale *= 1.0 - (wallProximity - 0.7) / 0.3 * 0.7;
+        }
+        const centripetalAccel = curv * sled.v * sled.v * centScale;
         sled.omega += centripetalAccel * dt;
 
-        // 2. Player steering
+        // 2. Player steering — boost when near wall to help recovery
         const steer = steerInput();
-        sled.omega += steer * PHYSICS.steerForce * dt;
+        let steerMult = 1.0;
+        if (wallProximity > 0.6) {
+            // Steering into the wall? normal. Steering away? boosted.
+            const steeringAway = (Math.sign(steer) !== Math.sign(sled.d));
+            if (steeringAway) steerMult = 1.0 + (wallProximity - 0.6) / 0.4 * 0.8;
+        }
+        sled.omega += steer * PHYSICS.steerForce * steerMult * dt;
 
         // 3. Lateral damping (ice has some grip)
         sled.omega *= Math.max(0, 1 - PHYSICS.lateralDamping * dt);
@@ -222,12 +239,15 @@
         if (Math.abs(sled.d) > hw) {
             const side = Math.sign(sled.d);
             sled.d = side * hw;
+            // Absorb lateral velocity into the wall rather than bouncing back in
             sled.omega = -sled.omega * PHYSICS.wallBounce;
-            sled.v *= (1 - PHYSICS.wallSpeedPenalty);
-            sled.wallHitTimer = 0.3;
+            // Only apply speed penalty on fresh hits (not while grinding)
+            if (sled.wallHitTimer <= 0) {
+                sled.v *= (1 - PHYSICS.wallSpeedPenalty);
+                addSparks(tp, sled.d, side);
+            }
+            sled.wallHitTimer = 0.15;
             sled.wallSide = side;
-            // Add sparks
-            addSparks(tp, sled.d, side);
         }
 
         // 6. Optimal line computation
