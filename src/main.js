@@ -17,6 +17,7 @@ import {
     updateResumeCountdown,
     handleNameEntryInput,
 } from './ui.js';
+import { setLeaderboardTab } from './leaderboard.js';
 
 // ---- Canvas setup ----
 function resizeCanvas() {
@@ -57,6 +58,12 @@ document.getElementById("track-go-btn").addEventListener("touchend", (e) => {
     e.preventDefault();
     if (state.gameState === "trackSelect") transitionTo("countdown");
 });
+
+// ---- Leaderboard tab buttons ----
+document.getElementById("lb-tab-global").addEventListener("click", () => setLeaderboardTab("global"));
+document.getElementById("lb-tab-local").addEventListener("click", () => setLeaderboardTab("local"));
+document.getElementById("lb-tab-global").addEventListener("touchend", (e) => { e.preventDefault(); setLeaderboardTab("global"); });
+document.getElementById("lb-tab-local").addEventListener("touchend", (e) => { e.preventDefault(); setLeaderboardTab("local"); });
 
 // ================================================================
 //  MAIN LOOP

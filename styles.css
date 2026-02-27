@@ -293,6 +293,35 @@ html, body {
     letter-spacing: 2px;
 }
 
+/* Leaderboard tabs */
+.lb-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.lb-tab {
+    background: transparent;
+    border: 1px solid #546e7a;
+    color: #90a4ae;
+    padding: 6px 20px;
+    font-family: inherit;
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.lb-tab:hover {
+    border-color: #4fc3f7;
+    color: #e0e8ff;
+}
+.lb-tab.active {
+    background: rgba(79,195,247,0.15);
+    border-color: #4fc3f7;
+    color: #4fc3f7;
+}
+
 /* Leaderboard track name */
 .leaderboard-track-name {
     font-size: 20px;
