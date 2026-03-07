@@ -2,7 +2,7 @@
 //  Bobsled Leaderboard — Cloudflare Worker (R2 Storage)
 // ============================================================
 
-const VALID_TRACKS = ["alpine", "glacier", "inferno"];
+const VALID_TRACKS = ["alpine", "glacier", "inferno", "infinite"];
 const MAX_NAME_LEN = 3;
 
 function r2Key(trackId) {
@@ -41,27 +41,42 @@ async function readLeaderboard(env, trackId) {
 
 // Write leaderboard to R2
 async function writeLeaderboard(env, trackId, entries) {
-  await env.LEADERBOARD_BUCKET.put(
-    r2Key(trackId),
-    JSON.stringify(entries),
-    { httpMetadata: { contentType: "application/json" } }
-  );
+  await env.LEADERBOARD_BUCKET.put(r2Key(trackId), JSON.stringify(entries), {
+    httpMetadata: { contentType: "application/json" },
+  });
 }
 
 // Validate a score submission
 function validateEntry(body) {
   if (!body || typeof body !== "object") return "Invalid JSON body";
-  if (typeof body.name !== "string" || body.name.length < 1 || body.name.length > MAX_NAME_LEN) {
+  if (
+    typeof body.name !== "string" ||
+    body.name.length < 1 ||
+    body.name.length > MAX_NAME_LEN
+  ) {
     return "Name must be 1-3 characters";
   }
   if (!/^[A-Z0-9 ]+$/.test(body.name)) {
     return "Name must be uppercase alphanumeric";
   }
-  if (typeof body.time !== "number" || body.time <= 0 || body.time > 600) {
-    return "Time must be a positive number under 600 seconds";
+  if (typeof body.time !== "number" || body.time <= 0 || body.time > 3600) {
+    return "Time must be a positive number under 3600 seconds";
   }
-  if (typeof body.topSpeed !== "number" || body.topSpeed < 0 || body.topSpeed > 200) {
+  if (
+    typeof body.topSpeed !== "number" ||
+    body.topSpeed < 0 ||
+    body.topSpeed > 200
+  ) {
     return "Top speed must be between 0 and 200 m/s";
+  }
+  if (body.distance !== undefined) {
+    if (
+      typeof body.distance !== "number" ||
+      body.distance < 0 ||
+      body.distance > 100000
+    ) {
+      return "Distance must be between 0 and 100000 meters";
+    }
   }
   return null;
 }
@@ -99,23 +114,43 @@ async function handlePostScore(env, trackId, request) {
   // Add entry
   entries.push({
     name: body.name.toUpperCase(),
-    time: Math.round(body.time * 1000) / 1000,   // 3 decimal places
+    time: Math.round(body.time * 1000) / 1000, // 3 decimal places
     topSpeed: Math.round(body.topSpeed * 100) / 100,
+    distance: body.distance ? Math.round(body.distance * 100) / 100 : undefined,
     date: new Date().toISOString(),
   });
 
-  // Sort by time ascending, keep top N
-  entries.sort((a, b) => a.time - b.time);
+  // Sort: infinite by distance descending, others by time ascending
+  if (trackId === "infinite") {
+    entries.sort((a, b) => (b.distance || 0) - (a.distance || 0));
+  } else {
+    entries.sort((a, b) => a.time - b.time);
+  }
   if (entries.length > maxEntries) entries.length = maxEntries;
 
   await writeLeaderboard(env, trackId, entries);
 
-  // Find rank of the submitted entry (first match by time + name)
-  const rank = entries.findIndex(
-    (e) => e.name === body.name.toUpperCase() && Math.abs(e.time - body.time) < 0.002
-  );
+  // Find rank of the submitted entry
+  let rank;
+  if (trackId === "infinite") {
+    rank = entries.findIndex(
+      (e) =>
+        e.name === body.name.toUpperCase() &&
+        Math.abs((e.distance || 0) - (body.distance || 0)) < 1,
+    );
+  } else {
+    rank = entries.findIndex(
+      (e) =>
+        e.name === body.name.toUpperCase() &&
+        Math.abs(e.time - body.time) < 0.002,
+    );
+  }
 
-  return jsonResponse({ ok: true, rank: rank + 1, total: entries.length }, 201, env);
+  return jsonResponse(
+    { ok: true, rank: rank + 1, total: entries.length },
+    201,
+    env,
+  );
 }
 
 // ---- Main fetch handler ----
