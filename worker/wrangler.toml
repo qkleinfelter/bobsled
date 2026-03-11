@@ -3,10 +3,8 @@ main = "src/index.js"
 compatibility_date = "2024-12-01"
 workers_dev = true
 
-# Serve /api/* on the same domain as the site (no CORS needed)
-routes = [
-  { pattern = "bobsled.qkleinfelter.com/api/*", zone_name = "qkleinfelter.com" }
-]
+# Routes are not used — Pages owns bobsled.qkleinfelter.com.
+# The worker is accessed via its own workers.dev subdomain or a dedicated API subdomain.
 
 # R2 bucket binding
 [[r2_buckets]]

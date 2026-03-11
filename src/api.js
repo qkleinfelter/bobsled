@@ -2,9 +2,8 @@
 //  Leaderboard API — Communicate with Cloudflare Worker
 // ============================================================
 
-// Uses same-origin requests (/api/*) by default.
-// Set to a full URL to use a different backend, or "OFF" to disable.
-const API_BASE = "";
+// API endpoint for the leaderboard worker. Set to "OFF" to disable.
+const API_BASE = "https://bobsled-leaderboard.qkleinfelter.workers.dev";
 
 function getApiBase() {
   return window.BOBSLED_API_URL ?? API_BASE;
