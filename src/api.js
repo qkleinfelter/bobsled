@@ -3,7 +3,7 @@
 // ============================================================
 
 // Set this to your deployed Worker URL, or "" to use local-only mode
-const API_BASE = "https://bobsled-leaderboard.qkleinfelter.workers.dev"; // e.g. "https://bobsled-leaderboard.your-subdomain.workers.dev"
+const API_BASE = "https://api.bobsled.qkleinfelter.com";
 
 function getApiBase() {
   // Allow runtime override via global
