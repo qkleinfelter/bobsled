@@ -2,16 +2,16 @@
 //  Leaderboard API — Communicate with Cloudflare Worker
 // ============================================================
 
-// Set this to your deployed Worker URL, or "" to use local-only mode
-const API_BASE = "https://bobsled-leaderboard.qkleinfelter.workers.dev";
+// Uses same-origin requests (/api/*) by default.
+// Set to a full URL to use a different backend, or "OFF" to disable.
+const API_BASE = "";
 
 function getApiBase() {
-  // Allow runtime override via global
-  return window.BOBSLED_API_URL || API_BASE;
+  return window.BOBSLED_API_URL ?? API_BASE;
 }
 
 function isOnline() {
-  return !!getApiBase();
+  return getApiBase() !== "OFF";
 }
 
 /**
