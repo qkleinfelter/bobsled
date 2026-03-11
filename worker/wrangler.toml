@@ -2,9 +2,9 @@ name = "bobsled-leaderboard"
 main = "src/index.js"
 compatibility_date = "2024-12-01"
 
-# Custom domain route (requires DNS CNAME pointed to workers.dev)
+# Serve /api/* on the same domain as the site (no CORS needed)
 routes = [
-  { pattern = "api.bobsled.qkleinfelter.com/*", zone_name = "qkleinfelter.com" }
+  { pattern = "bobsled.qkleinfelter.com/api/*", zone_name = "qkleinfelter.com" }
 ]
 
 # R2 bucket binding

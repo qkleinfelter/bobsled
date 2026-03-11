@@ -3,7 +3,7 @@
 // ============================================================
 
 // Set this to your deployed Worker URL, or "" to use local-only mode
-const API_BASE = "https://api.bobsled.qkleinfelter.com";
+const API_BASE = ""; // Same-origin: worker handles /api/* on the same domain
 
 function getApiBase() {
   // Allow runtime override via global
